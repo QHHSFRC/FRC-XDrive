@@ -31,7 +31,7 @@ class Robot : public frc::TimedRobot {
     void AutonomousPeriodic() {}
     void TeleopInit() {}
     void TeleopPeriodic() {
-      DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5)); //During the driver operated period, continue looping the drive function
+      DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5), driveStick.GetRawButton(6), driveStick.GetRawButton(8)); //During the driver operated period, continue looping the drive function
     }
 /*
 * The following are the parameters for the drive function in order
