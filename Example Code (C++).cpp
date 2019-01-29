@@ -31,6 +31,68 @@ class Robot : public frc::TimedRobot {
     void AutonomousPeriodic() {}
     void TeleopInit() {}
     void TeleopPeriodic() {
-      DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5), driveStick.GetRawButton(6));
+      DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5));
     }
+    void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton1, bool switchButton2, bool resetButton) {
+      if(resetButton)
+      {
+        gyro.Reset();
+      }
+      
+      angle = -gyro.GetAngle();
+      
+      joyX = xAxis;
+      joyY = -yAxis;
+      joyZ = zAxis;
+      
+      vel = (sqrt((joyX * joyX) + (joyY * joyY)) / sqrt(2));
+      
+      if(switchButton1)
+      {
+        centricState = 0;
+      }
+      else if(switchButton2)
+      {
+        centricState = 1;
+      }
+      
+      if(centricState)
+      {
+        x2 = joyX;
+        y2 = joyY;
+      }
+      else
+      {
+        x2 = vel * (cos(atan2(joyY, joyX) - (angle * (M_PI / 180))));
+        y2 = vel * (sin(atan2(joyY, joyX) - (angle * (M_PI / 180))));
+      }
+      
+      if(x2 == 0)
+      {
+        x2 = 0.001;
+      }
+      
+      fL = (sin(atan(y2 / x2) + (M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5;
+      fR = (sin(atan(y2 / x2) + (3 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5;
+      bR = (sin(atan(y2 / x2) + (5 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5;
+      bL = (sin(atan(y2 / x2) + (7 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5;
+      
+      if(x2 < 0)
+      {
+        fL *= -1;
+        fR *= -1;
+        bR *= -1;
+        bL *= -1;
+      }
+      
+      fL += joyZ / 5;
+      fR += joyZ / 5;
+      bR += joyZ / 5;
+      bL += joyZ / 5;
+    }
+  
+    void TestPeriodic() {}
 };
+#ifndef RUNNING_FRC_TESTS
+int main() {return frc::StartRobot<Robot>(); }
+#endif
