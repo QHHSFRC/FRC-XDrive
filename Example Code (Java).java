@@ -1,3 +1,6 @@
+//Please keep in mind that we do not program in Java, so we cannot guarantee this working. Please let us know if it doesn't though
+
+
 package frc.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Joystick;
