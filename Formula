@@ -1,0 +1,16 @@
+Variable Dictionary:
+  joyX: The control axis chosen to control the robot's movement along the X axis (movement perpendicular to the forward/backward axis)
+  joyY: The control axis chosen to control the robot's movement along the Y axis (movement along the forward/backward axis)
+  joyZ: The control axis chosen to control the robot's rotation
+  vel:  The goal velocity regardless of the direction given by the controller
+  x2:   The X axis translated to accommodate for the robot's rotation (this is used specifically for a field-centric x-drive and is unnecessary for a standard robot-centric x-drive)
+  y2:   The Y axis translated to accommodate for the robot's rotation (this is used specifically for a field-centric x-drive and is unnecessary for a standard robot-centric x-drive)
+  fL:   The value to be passed to the motor controller in the Front Left of the robot (in terms of -1 to 1)
+  fR:   The value to be passed to the motor controller in the Front Right of the robot (in terms of -1 to 1)
+  bR:   The value to be passed to the motor controller in the Back Right of the robot (in terms of -1 to 1)
+  bL:   The value to be passed to the motor controller in the Back Left of the robot (in terms of -1 to 1)
+  centricState: A boolean representing whether the robot is using a field-centric x-drive or a robot-centric x-drive
+  angle: The angle of the gyro (IMPORTANT: The gyro we use returns the angle in degrees. If yours does otherwise (like radians), you'll have to convert it for this formula to work. You must also ensure that it is calibrated such that forward is 0 and that the angle increases in value when the robot rotates clockwise)
+  
+Formula (Keep in mind, it is not intended to graph anything, we only used this site to help visualize the mess of parenthesis in the example code.):
+https://www.desmos.com/calculator/amz7tqy0dt
