@@ -34,13 +34,13 @@ class Robot : public frc::TimedRobot {
       DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5), driveStick.GetRawButton(6), driveStick.GetRawButton(8)); //During the driver operated period, continue looping the drive function
     }
 /*
-* The following are the parameters for the drive function in order
-* The variable representing the x-axis of the joystick within the function (left/right)
-* The variable representing the y-axis of the joystick within the function (forward/back)
-* The variable representing the z-axis of the joystick within the function (turning)
-* The boolean representing the button that puts the program into field-centric mode (controls are relative to the field)
-* The boolean representing the button that puts the program into robot-centric mode (controls are relative to the robot)
-* The boolean representing the button that resets the gyro angle to zero
+ The following are the parameters for the drive function in order
+ The variable representing the x-axis of the joystick within the function (left/right)
+ The variable representing the y-axis of the joystick within the function (forward/back)
+ The variable representing the z-axis of the joystick within the function (turning)
+ The boolean representing the button that puts the program into field-centric mode (controls are relative to the field)
+ The boolean representing the button that puts the program into robot-centric mode (controls are relative to the robot)
+ The boolean representing the button that resets the gyro angle to zero
 */
     void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton1, bool switchButton2, bool resetButton) { //This is the drive function referenced in the driver operated period
       if(resetButton) //Reset the gyro when the "resetButton" is pressed
