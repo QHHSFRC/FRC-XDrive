@@ -7,6 +7,9 @@ class Robot : public frc::TimedRobot {
   bool centricState{0};
   
   float angle{0}; //Can be an int if the gyro does not return decimals
+  float angleError{0};
+  float goalAngle{0};
+  
   
   float joyX{0}; //Variable that will be used to store the X value of the control axis
   float joyY{0}; //Variable that will be used to store the Y value of the control axis
@@ -34,7 +37,11 @@ class Robot : public frc::TimedRobot {
       gyro.Reset(); //Reset the gyro to angle 0. This is assuming your robot will be facing the direction that you want to be "forward" for the field-centric program
     }
     void AutonomousPeriodic() {}
-    void TeleopInit() {}
+    void TeleopInit() {
+      gyro.Reset(); //We recommend including these while testing. However, when competing, you might want to replace them with the note below
+      goalAngle = 0;
+      //goalAngle = -gyro.GetAngle(); <-We're using a negative because of the direction that our gyro's angle increases. Yours may be different
+    }
     void TeleopPeriodic() {
       DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5), driveStick.GetRawButton(6)); //During the driver operated period, continue looping the drive function
     }
@@ -43,14 +50,14 @@ class Robot : public frc::TimedRobot {
  The variable representing the x-axis of the joystick within the function (left/right)
  The variable representing the y-axis of the joystick within the function (forward/back)
  The variable representing the z-axis of the joystick within the function (turning)
- The boolean representing the button that puts the program into field-centric mode (controls are relative to the field)
- The boolean representing the button that puts the program into robot-centric mode (controls are relative to the robot)
+ The boolean representing the button that switches the program to/from field-centric mode (controls are relative to the field) and robot-centric mode (controls are relative to the field)
  The boolean representing the button that resets the gyro angle to zero
 */
-    void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton1, bool resetButton) { //This is the drive function referenced in the driver operated period
+    void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton, bool resetButton) { //This is the drive function referenced in the driver operated period
       if(resetButton) //Reset the gyro when the "resetButton" is pressed
       {
         gyro.Reset();
+        goalAngle = 0; //Reset the goal angle as well to prevent spinning back to position prior to resset
       }
       
       angle = -gyro.GetAngle(); //Our gyro's angle increased when going counter clockwise, which is not what we want; hence, the negative
@@ -61,11 +68,11 @@ class Robot : public frc::TimedRobot {
       
       vel = (sqrt((joyX * joyX) + (joyY * joyY)) / sqrt(2)); //Set the velocity variable to that of the joystick
       
-      if(switchButton1 && centricState == 1) //Put the robot in field-centric mode by setting the boolean to 0
+      if(switchButton && centricState == 1) //Put the robot in field-centric mode by setting the boolean to 0
       {
         centricState = 0;
       }
-      else if(switchButton1 && centricState == 0) //Put the robot in robot-centric mode by setting the boolean to 1
+      else if(switchButton && centricState == 0) //Put the robot in robot-centric mode by setting the boolean to 1
       {
         centricState = 1;
       }
@@ -99,12 +106,35 @@ class Robot : public frc::TimedRobot {
         bL *= -1;
       }
       
-      fL += joyZ / 2; //Include the value of the turning axis in the output. We found it most comfortable to reduce the turning strength significantly, but the constant (2) can be adjusted to your driver's preference
-      fR += joyZ / 2;
-      bR += joyZ / 2;
-      bL += joyZ / 2;
+      if(driveStick.GetPOV() == -1) //If the controllers d'pad is not pressed, use the turning axis to determine the goal angle
+      {
+        goalAngle -= int(joyZ) * 2; //Increment the goal angle instead of directly translating joystick position into turning speed. This allows the robot to resist angle changes while moving without turning
+      }
+      else //If the controller's d'pad is pressed in any direction, set the goal angle to the angle of the d'pad
+      {
+        if(driveStick.GetPOV() > 180) //If the d'pad has an angle of more than 180 (more than half of a full turn), convert it to a negative direction so that the robot doesn't have to spin as far
+        {
+          goalAngle = -(360 - driveStick.GetPOV());
+        }
+        else
+        {
+          goalAngle = driveStick.GetPOV();
+        }
+      }
       
-      maxAxis = std::max({fabs(joyX), fabs(joyY), fabs(joyZ) / 2}) //Find the maximum input given by the controller's axes
+      angleError = (angle - goalAngle) / 90;
+      
+      fL += angleError; //Include the value of the turning axis in the output. We found it most comfortable to reduce the turning strength significantly, but the constant (2) can be adjusted to your driver's preference
+      fR += angleError;
+      bR += angleError;
+      bL += angleError;
+      
+      if(fabs(angleError) > 0.5)
+      {
+        angleError = 0.5; //Prevent the angle error from passing 0.5 (user preference) so that the normalizer won't force the robot to spin too fast
+      }
+      
+      maxAxis = std::max({fabs(joyX), fabs(joyY), fabs(angleError)}) //Find the maximum input given by the controller's axes and the angle corrector
       maxOutput = std::max({fabs(output1), fabs(output2), fabs(output3), fabs(output4)}); //Find the maximum output that the drive program has calculated
       
       if(maxOutput == 0 || maxAxis == 0)
