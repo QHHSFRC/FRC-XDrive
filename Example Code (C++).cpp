@@ -17,6 +17,11 @@ class Robot : public frc::TimedRobot {
   
   float vel{0}; //Variable that will be used to store the intended velocity regardless of direction
   
+  float maxAxis{0};
+  float maxOutput{0};
+  
+  float normalizer{0};
+  
   float fL{0}; //Variable that will be used to store the value that will be passed to the Front Left motor
   float fR{0}; //Variable that will be used to store the value that will be passed to the Front Right motor
   float bR{0}; //Variable that will be used to store the value that will be passed to the Back Right motor
@@ -31,7 +36,7 @@ class Robot : public frc::TimedRobot {
     void AutonomousPeriodic() {}
     void TeleopInit() {}
     void TeleopPeriodic() {
-      DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5), driveStick.GetRawButton(6), driveStick.GetRawButton(8)); //During the driver operated period, continue looping the drive function
+      DriveFunction(driveStick.GetRawAxis(4), driveStick.GetRawAxis(5), driveStick.GetRawAxis(0), driveStick.GetRawButton(5), driveStick.GetRawButton(6)); //During the driver operated period, continue looping the drive function
     }
 /*
  The following are the parameters for the drive function in order
@@ -42,7 +47,7 @@ class Robot : public frc::TimedRobot {
  The boolean representing the button that puts the program into robot-centric mode (controls are relative to the robot)
  The boolean representing the button that resets the gyro angle to zero
 */
-    void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton1, bool switchButton2, bool resetButton) { //This is the drive function referenced in the driver operated period
+    void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton1, bool resetButton) { //This is the drive function referenced in the driver operated period
       if(resetButton) //Reset the gyro when the "resetButton" is pressed
       {
         gyro.Reset();
@@ -56,11 +61,11 @@ class Robot : public frc::TimedRobot {
       
       vel = (sqrt((joyX * joyX) + (joyY * joyY)) / sqrt(2)); //Set the velocity variable to that of the joystick
       
-      if(switchButton1) //Put the robot in field-centric mode by setting the boolean to 0
+      if(switchButton1 && centricState == 1) //Put the robot in field-centric mode by setting the boolean to 0
       {
         centricState = 0;
       }
-      else if(switchButton2) //Put the robot in robot-centric mode by setting the boolean to 1
+      else if(switchButton1 && centricState == 0) //Put the robot in robot-centric mode by setting the boolean to 1
       {
         centricState = 1;
       }
@@ -81,10 +86,10 @@ class Robot : public frc::TimedRobot {
         x2 = 0.001;
       }
       
-      fL = (sin(atan(y2 / x2) + (M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5; //Set the motors to their appropriate speed based on the formula (each are offset by a factor of pi/2 to account for the 90 degree difference in the wheels)
-      fR = (sin(atan(y2 / x2) + (3 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5; //The constant (1.5) can be adjusted to your driver's preference (though we recommend verifying that there is no instance where a motor controller would be passed a value outside of its range)
-      bR = (sin(atan(y2 / x2) + (5 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5;
-      bL = (sin(atan(y2 / x2) + (7 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2))) / 1.5;
+      fL = sin(atan(y2 / x2) + (M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2)); //Set the motors to their appropriate speed based on the formula (each are offset by a factor of pi/2 to account for the 90 degree difference in the wheels)
+      fR = sin(atan(y2 / x2) + (3 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2));
+      bR = sin(atan(y2 / x2) + (5 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2));
+      bL = sin(atan(y2 / x2) + (7 * M_PI / 4)) * sqrt((x2 * x2) + (y2 * y2));
       
       if(x2 < 0) //Inverts the motors when x2 is less than 0 to account for the nonnegative sine curve
       {
@@ -94,10 +99,27 @@ class Robot : public frc::TimedRobot {
         bL *= -1;
       }
       
-      fL += joyZ / 5; //Include the value of the turning axis in the output. We found it most comfortable to reduce the turning strength significantly, but the constant (5) can be adjusted to your driver's preference (though we recommend verifying that there is no instance where a motor controller would be passed a value outside of its range)
-      fR += joyZ / 5;
-      bR += joyZ / 5;
-      bL += joyZ / 5;
+      fL += joyZ / 2; //Include the value of the turning axis in the output. We found it most comfortable to reduce the turning strength significantly, but the constant (2) can be adjusted to your driver's preference
+      fR += joyZ / 2;
+      bR += joyZ / 2;
+      bL += joyZ / 2;
+      
+      maxAxis = std::max({fabs(joyX), fabs(joyY), fabs(joyZ) / 2}) //Find the maximum input given by the controller's axes
+      maxOutput = std::max({fabs(output1), fabs(output2), fabs(output3), fabs(output4)}); //Find the maximum output that the drive program has calculated
+      
+      if(maxOutput == 0 || maxAxis == 0)
+      {
+        normalizer = 0; //Prevent the undefined value for normalizer
+      }
+      else
+      {
+        normalizer = maxAxis / maxOutput;
+      }
+  
+      fL *= normalizer;
+      fR *= normalizer;
+      bR *= normalizer;
+      bL *= normalizer;
     }
   
     void TestPeriodic() {}
