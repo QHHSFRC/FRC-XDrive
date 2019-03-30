@@ -13,4 +13,5 @@ Variable Dictionary:
   angle: The angle of the gyro (IMPORTANT: The gyro we use returns the angle in degrees. If yours does otherwise (like radians), you'll have to convert it for this formula to work. You must also ensure that it is calibrated such that forward is 0 and that the angle increases in value when the robot rotates clockwise)
   
 Formula (Keep in mind, it is not intended to graph anything, we only used this site to help visualize the mess of parenthesis in the example code.):
+In Desmos, the formula is slightly different and shows semi-inaccurate example values, because desmos cannot normalize the drive motor values to the maximum controller input value.
 https://www.desmos.com/calculator/ergrjuy6uy
