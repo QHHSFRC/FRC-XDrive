@@ -50,7 +50,7 @@ class Robot : public frc::TimedRobot {
  The variable representing the x-axis of the joystick within the function (left/right)
  The variable representing the y-axis of the joystick within the function (forward/back)
  The variable representing the z-axis of the joystick within the function (turning)
- The boolean representing the button that switches the program to/from field-centric mode (controls are relative to the field) and robot-centric mode (controls are relative to the field)
+ The boolean representing the button that switches the program to/from field-centric mode (controls are relative to the field) and robot-centric mode (controls are relative to the robot)
  The boolean representing the button that resets the gyro angle to zero
 */
     void DriveFunction(float xAxis, float yAxis, float zAxis, bool switchButton, bool resetButton) { //This is the drive function referenced in the driver operated period
