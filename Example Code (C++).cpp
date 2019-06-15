@@ -106,23 +106,7 @@ class Robot : public frc::TimedRobot {
         bL *= -1;
       }
       
-      if(driveStick.GetPOV() == -1) //If the controllers d'pad is not pressed, use the turning axis to determine the goal angle
-      {
-        goalAngle -= int(joyZ) * 2; //Increment the goal angle instead of directly translating joystick position into turning speed. This allows the robot to resist angle changes while moving without turning
-      }
-      else //If the controller's d'pad is pressed in any direction, set the goal angle to the angle of the d'pad
-      {
-        if(driveStick.GetPOV() > 180) //If the d'pad has an angle of more than 180 (more than half of a full turn), convert it to a negative direction so that the robot doesn't have to spin as far
-        {
-          goalAngle = -(360 - driveStick.GetPOV());
-        }
-        else
-        {
-          goalAngle = driveStick.GetPOV();
-        }
-      }
-      
-      angleError = (angle - goalAngle) / 90;
+      angleError = (angle - goalAngle) / 90; //This controls the rate at which the robot attempts to correct its heading. A smaller constant results in more aggressive correction.
       
       fL += angleError; //Include the value of the turning axis in the output. We found it most comfortable to reduce the turning strength significantly, but the constant (2) can be adjusted to your driver's preference
       fR += angleError;
